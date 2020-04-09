@@ -47,4 +47,12 @@ public class LeaderDaoTest {
         // Page<MkUser> result=userRep.findAll(pageable);
         // System.out.println("total result :"+result.getNumber());
     }
+
+    @Test
+    public void testPagedQueryFix() throws SQLException {
+        PagedQuery qry = new PowerDomainQuery().withAutoRemoveDupFields(true)
+                .addDomainFieldsExclude(MkBill.class, new String[] { "id" })
+                .withOrderBy("order by phone asc ").withPageIndex(0).withPageSize(60);
+        System.out.println(qry.buildSQLWithPage());
+    }
 }

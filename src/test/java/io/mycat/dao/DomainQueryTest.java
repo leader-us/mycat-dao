@@ -1,5 +1,6 @@
 package io.mycat.dao;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ import io.mycat.housesys.domain.MkUser;
 public class DomainQueryTest {
 
     @Test
-    public void buildSQL() {
+    public void buildSQL() throws SQLException {
         String condtion = "${AND phone like :phone }  ${OR sex= :sex} ${AND totlePrice != :totlePrice }";
         Map<String, Object> params = new HashMap<>();
         params.put("phone", "xxxxx");
@@ -29,7 +30,7 @@ public class DomainQueryTest {
     }
 
     @Test
-    public void buildSQL2() {
+    public void buildSQL2() throws SQLException {
         String condtion = "${AND phone like :phone }  ${OR sex= :sex} ${AND totlePrice != :totlePrice }";
         Map<String, Object> params = new HashMap<>();
         params.put("phone", "xxxxx");
