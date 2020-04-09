@@ -74,7 +74,7 @@ public abstract class PagedQuery {
     }
 
     public PagedQuery withPageIndex(int value) {
-        this.pageIndex = value - 1 ;
+        this.pageIndex = value - 1;
         return this;
     }
 
