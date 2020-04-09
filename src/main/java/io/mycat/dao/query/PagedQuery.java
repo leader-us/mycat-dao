@@ -1,5 +1,6 @@
 package io.mycat.dao.query;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,14 +34,14 @@ public abstract class PagedQuery {
      *
      * @return SQL
      */
-    public String buildSQLWithPage() {
+    public String buildSQLWithPage() throws SQLException {
 
         if (this.pageIndex > -1) {
             StringBuilder sb = new StringBuilder().append(this.buildSQLNoPage());
             sb.append(" LIMIT ").append(this.pageSize).append(" OFFSET ").append(this.pageIndex * this.pageSize);
             return sb.toString();
         } else {
-            return this.buildSQLNoPage();
+            throw new SQLException("the pageIndex must more than 0");
         }
     }
 

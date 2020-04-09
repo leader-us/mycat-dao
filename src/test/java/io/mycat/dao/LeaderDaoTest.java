@@ -49,10 +49,10 @@ public class LeaderDaoTest {
     }
 
     @Test
-    public void testPagedQueryFix(){
+    public void testPagedQueryFix() throws SQLException {
         PagedQuery qry = new PowerDomainQuery().withAutoRemoveDupFields(true)
                 .addDomainFieldsExclude(MkBill.class, new String[] { "id" })
-                .withOrderBy("order by phone asc ").withPageIndex(2).withPageSize(60);
+                .withOrderBy("order by phone asc ").withPageIndex(0).withPageSize(60);
         System.out.println(qry.buildSQLWithPage());
     }
 }

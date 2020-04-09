@@ -1,5 +1,6 @@
 package io.mycat.dao;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +8,7 @@ import org.junit.Test;
 
 public class PowerNativeSQLPagedQueryTest {
     @Test
-    public void testBuildSQL1() {
+    public void testBuildSQL1() throws SQLException {
         String sql = "select a.*,b.title from a,b where (a.id=b.pid ) and 1=1 ";
         String dynaConditon = "${and phone like :phone} ${or sex like :sex}";
         Map<String, Object> params = new HashMap<>();
@@ -20,7 +21,7 @@ public class PowerNativeSQLPagedQueryTest {
     }
 
     @Test
-    public void testBuildSQL2() {
+    public void testBuildSQL2() throws SQLException {
         String sql = "select a.*,b.title from a,b where (a.id=b.pid ) and 1=1 ";
         Map<String, Object> params = new HashMap<>();
         params.put("phone", "xxxxx");
