@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  * tabl1.id=table2.parid ${OR t2.field= :field2} ${AND t3.field != :field3 }
  * 其中每个形如${..:field * ...}的元祖都是一个动态参数，
  * 当queryParams里没有对应的field键值对存在时，这部分内容会被自动取消， 不出现在最后生成的SQL语句汇中
- * 
+ *
  * @author Leader us
  */
 public abstract class PagedQuery {
@@ -23,21 +23,21 @@ public abstract class PagedQuery {
 
     /**
      * 生成Native SQL,可配合参数Map执行, 注意不带分页语句
-     * 
+     *
      * @return SQL
      */
     public abstract String buildSQLNoPage();
 
     /**
      * 返回带分页语句的完整SQL
-     * 
+     *
      * @return SQL
      */
     public String buildSQLWithPage() {
 
         if (this.pageIndex > -1) {
             StringBuilder sb = new StringBuilder().append(this.buildSQLNoPage());
-            sb.append(" LIMIT ").append(this.pageSize).append(" OFFSET ").append(this.pageIndex);
+            sb.append(" LIMIT ").append(this.pageSize).append(" OFFSET ").append(this.pageIndex * this.pageSize);
             return sb.toString();
         } else {
             return this.buildSQLNoPage();
@@ -46,7 +46,7 @@ public abstract class PagedQuery {
 
     /**
      * 返回查询结果集总数的SQL
-     * 
+     *
      * @return
      */
     public String buildTotalCountSQL() {
@@ -74,7 +74,7 @@ public abstract class PagedQuery {
     }
 
     public PagedQuery withPageIndex(int value) {
-        this.pageIndex = value * this.pageSize;
+        this.pageIndex = value ;
         return this;
     }
 
