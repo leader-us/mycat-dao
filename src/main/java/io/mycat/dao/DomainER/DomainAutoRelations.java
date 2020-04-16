@@ -18,7 +18,7 @@ import io.mycat.dao.util.NameUtil;
 /**
  * using @ForeinKey Annotions to find Domain/Entity ER relations to provide auto
  * Domain Relation Query Building ability
- * 
+ *
  * @author Leader us
  */
 public class DomainAutoRelations {
@@ -79,6 +79,22 @@ class DomainInfo {
         this.findPrimaryKeyAndParentRelations();
 
     }
+
+    public DomainInfo(Class<?> domainCls,String[] fields) {
+        this.tableName = NameUtil.propertyToColumn(StringUtils.uncapitalize(domainCls.getSimpleName()));
+        this.domainCls = domainCls;
+        this.fields = getSingleDomainFields(fields);
+    }
+
+    private List<DomainField> getSingleDomainFields(String[] fields){
+        boolean idFound = false;
+        List<DomainField> fieldNames = new ArrayList<>();
+        for (String name : fields) {
+            fieldNames.add(new DomainField(this, name, name));
+        }
+        return fieldNames;
+    }
+
 
     private void findPrimaryKeyAndParentRelations() {
         for (DomainField field : this.fields) {
@@ -196,6 +212,7 @@ class DomainInfo {
         }
         return fieldNames;
     }
+
 
 }
 

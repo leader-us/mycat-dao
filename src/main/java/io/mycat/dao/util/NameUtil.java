@@ -81,4 +81,16 @@ public class NameUtil {
     return val != null && val.length() != 0;
   }
 
+  /**
+   * 首字母转小写
+   * @param s
+   * @return
+   */
+  public static String toLowerCaseFirstOne(String s){
+    if(Character.isLowerCase(s.charAt(0)))
+      return s;
+    else
+      return Character.toLowerCase(s.charAt(0)) + s.substring(1);
+  }
+
 }
