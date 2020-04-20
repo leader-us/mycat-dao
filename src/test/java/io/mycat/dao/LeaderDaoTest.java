@@ -51,7 +51,7 @@ public class LeaderDaoTest {
 
     @Test
     public void testPagedQueryFix() throws SQLException {
-        Map<String, Object> params = new HashMap();
+        Map<String, Object> params = new HashMap<>();
         params.put("phone", "phone");
 
         String group_by_id = new SingleDomainQuery()

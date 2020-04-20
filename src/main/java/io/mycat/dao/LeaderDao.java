@@ -101,6 +101,13 @@ public class LeaderDao {
 
     }
 
+    /**
+     * 一对多sql查询
+     *
+     * @param query 查询地向
+     * @return
+     * @throws SQLException 构造sql异常
+     */
     private JsonArray exeO2MPagedQuery(PagedQuery query) throws SQLException {
         O2MQuery o2MQuery = (O2MQuery) query;
         String osql = o2MQuery.buildSQLWithPage();
@@ -122,6 +129,7 @@ public class LeaderDao {
                 params.put(foreginKey, id);
                 String msql = null;
                 try {
+                    //在这里自动匹配主表主键
                     msql = singleDomainQuery.withDefaultCondHandler("${  " + foreginKey + " = :" + foreginKey + " } ").wtihQueryParams(params).buildSQLWithPage();
                 } catch (SQLException throwables) {
                     throw new RuntimeException("the sql err");
@@ -131,6 +139,7 @@ public class LeaderDao {
                     log.debug("gernerted sql:{}", msql);
                 }
                 JsonArrayBuilder jsonArrayBuilder = JsonResultSet.toMJson(childRowSet);
+                //默认名称为子表实体 + List
                 jsonObjectBuilder.add(clzName + "List", jsonArrayBuilder);
             });
             jsonArray.add(jsonObjectBuilder);

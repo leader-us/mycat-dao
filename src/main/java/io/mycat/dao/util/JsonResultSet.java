@@ -72,15 +72,21 @@ public class JsonResultSet {
         return jsonResults;
     }
 
+    /**
+     * 一对多查询时,使用的json字段映射方法
+     * 由于自定义sql的不确定性
+     * 此处目前采用的策略是不处理返回的字段名,
+     *
+     * @param rowSet
+     * @return
+     */
     public static JsonArrayBuilder toMJson(SqlRowSet rowSet) {
-
         JsonArrayBuilder jsonArray = Json.createArrayBuilder();
         if (rowSet == null) {
             return jsonArray;
         }
         SqlRowSetMetaData meta = rowSet.getMetaData();
         int colCount = meta.getColumnCount();
-
         while (rowSet.next()) {
             JsonObjectBuilder jsonResults = Json.createObjectBuilder();
             for (int i = 1; i <= colCount; i++) {
@@ -94,6 +100,13 @@ public class JsonResultSet {
         return jsonArray;
     }
 
+    /**
+     * 判断sql返回结果是什么类型,并且映射字段为驼峰
+     *
+     * @param jsonResults json字符串构造器
+     * @param column      返回结果中的字段名
+     * @param value       返回结果中的字段名所对应的值
+     */
     private static void jsonResultsValidate(JsonObjectBuilder jsonResults, String column, Object value) {
         if (value != null) {
             if (value instanceof String) {

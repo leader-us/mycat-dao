@@ -10,6 +10,14 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
+ * 单表查询对象
+ * <p>
+ * 支持自定义SQL
+ * <p>
+ * 例如 new SingleDomainQuery().withSelectFields(Class<?> domainCls, new String[]{ "user_id as ui","role_id as ri"})
+ * <p>
+ * 此类也是一对多查询对象(O2MQuery) 中的 自定义子查询的实现基础
+ *
  * @author jim
  */
 public class SingleDomainQuery extends PagedQuery {
@@ -33,7 +41,7 @@ public class SingleDomainQuery extends PagedQuery {
      * 使用默认的AutoQueryConditonHandler处理变量条件语句
      *
      * @param dynaConditon
-     * @return
+     * @return SingleDomainQuery
      */
     public SingleDomainQuery withDefaultCondHandler(String dynaConditon) {
         defaultConHandler.setDynaCondition(dynaConditon);
@@ -45,7 +53,7 @@ public class SingleDomainQuery extends PagedQuery {
      * 使用自定义的ConditonHandler处理变量条件语句
      *
      * @param condHandler
-     * @return
+     * @return SingleDomainQuery
      */
     public SingleDomainQuery withCustomerCondHandler(DynaQueryCondHanlder condHandler) {
         this.condHandler = condHandler;
@@ -127,7 +135,7 @@ public class SingleDomainQuery extends PagedQuery {
             // 没有JOIN ，没有Where
             sb.delete(sb.lastIndexOf(" WHERE "), sb.length());
         }
-        if(!"".equals(this.groupBy)){
+        if (!"".equals(this.groupBy)) {
             sb.append(" " + this.groupBy);
         }
         if (this.orderBy != null) {
@@ -166,6 +174,13 @@ public class SingleDomainQuery extends PagedQuery {
         return queryFields;
     }
 
+    /**
+     * 单表查询条件构造方法
+     *
+     * @param domainCls 单表实体
+     * @param fields    自定义sql字段
+     * @return 单表自定义sql查询对象(SingleDomainQuery)
+     */
     public SingleDomainQuery withSelectFields(Class<?> domainCls, String[] fields) {
         DomainInfo domain = new DomainInfo(domainCls, fields);
         return this.addQueryFields(domain.fields);

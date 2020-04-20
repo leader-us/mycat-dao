@@ -1,5 +1,6 @@
 package io.mycat.dao.DomainER;
 
+import io.mycat.dao.DomainER.abs.AbstractQuery;
 import io.mycat.dao.query.AutoQueryConditonHandler;
 import io.mycat.dao.query.DynaQueryCondHanlder;
 import io.mycat.dao.query.PagedQuery;
@@ -12,15 +13,25 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
+ * 一对多查询对象
+ * <p>
+ * 此类中含有 addDomainFieldsExclude ,addDomainFieldsInclude 方法用于构造主表查询对象(DomainInfo)
+ * <p>
+ * withDomain 方法为追加子查询.子查询对象(SingleDomainQuery)
+ * <p>
+ * 所有子表查询对象会保存到childrenDomainMap 中 , 在执行查询时, 会遍历 childrenDomainMap 中每个 ChildrenDomainQuery 对象中存储的
+ * (SingleDomainQuery) 对象, 用于构造sql
+ *
  * @author jim
  */
-public class O2MQuery extends PagedQuery {
+public class O2MQuery  extends PagedQuery   {
     protected static Logger log = LoggerFactory.getLogger(O2MQuery.class);
     private final List<QueryField> queryFields = new ArrayList<>();
     private boolean autoRemoveDuplicateFields = true;
     private DynaQueryCondHanlder condHandler = null;
     private AutoQueryConditonHandler defaultConHandler = new AutoQueryConditonHandler();
     private String groupBy = "";
+    //存储子查询对象
     public Map<String, ChildrenDomainQuery> childrenDomainMap = new LinkedHashMap<>();
     //当前操作的子查询名称
     private String childrenDomanName;
@@ -38,7 +49,7 @@ public class O2MQuery extends PagedQuery {
      * 使用默认的AutoQueryConditonHandler处理变量条件语句
      *
      * @param dynaConditon
-     * @return
+     * @return O2MQuery
      */
     public O2MQuery withDefaultCondHandler(String dynaConditon) {
         defaultConHandler.setDynaCondition(dynaConditon);
@@ -50,20 +61,25 @@ public class O2MQuery extends PagedQuery {
      * 使用自定义的ConditonHandler处理变量条件语句
      *
      * @param condHandler
-     * @return
+     * @return O2MQuery
      */
     public O2MQuery withCustomerCondHandler(DynaQueryCondHanlder condHandler) {
         this.condHandler = condHandler;
         return this;
     }
 
+    /**
+     * 自动去除重复字段,默认开启
+     *
+     * @param value true or false
+     * @return 一对多查询对象(O2MQuery)
+     */
     public O2MQuery withAutoRemoveDupFields(boolean value) {
         this.autoRemoveDuplicateFields = value;
         return this;
     }
 
     public O2MQuery addDomainFieldsExclude(Class<?> domainCls, String[] excludeFiels) {
-
         DomainInfo domain = DomainAutoRelations.findDomainByClass(domainCls);
         return this.addQueryFields(domain.getFieldsExclude(excludeFiels));
     }
@@ -74,7 +90,6 @@ public class O2MQuery extends PagedQuery {
     }
 
     public String buildSQLNoPage() {
-
         Set<String> allDomains = new LinkedHashSet<>();
         StringBuilder sb = new StringBuilder().append("SELECT ");
         for (QueryField field : queryFields) {
@@ -171,6 +186,13 @@ public class O2MQuery extends PagedQuery {
         return queryFields;
     }
 
+    /**
+     * 构建子查询对象,保存在 childrenDomainMap 中
+     *
+     * @param domainCls 表对象
+     * @param fields    sql
+     * @return O2MQuery 一对多查询对象
+     */
     public O2MQuery withSelectFields(Class<?> domainCls, String[] fields) {
         DomainInfo domain = new DomainInfo(domainCls, fields);
         return this.addQueryFields(domain.fields);
@@ -197,7 +219,15 @@ public class O2MQuery extends PagedQuery {
         return this;
     }
 
+    /**
+     * 调用此方法,新增子查询
+     *
+     * @param domainCls 子表实体
+     * @param strings   字段sql
+     * @return 一对多查询对象(O2MQuery)
+     */
     public O2MQuery withDomain(Class<?> domainCls, String[] strings) {
+        //寻找子表实体主键
         String foreginKey = this.findForeginKey(domainCls);
         SingleDomainQuery query = new SingleDomainQuery().withSelectFields(domainCls, strings);
         String simpleName = domainCls.getSimpleName();
@@ -231,15 +261,20 @@ public class O2MQuery extends PagedQuery {
         return this;
     }
 
+    /**
+     * 验证子表对象是否保存,如果没有保存则会抛出异常
+     *
+     * @return 自查询对象(SingleDomainQuery)
+     */
     private SingleDomainQuery validateChildrenDomainMap() {
-        if(null != this.childrenDomanName && childrenDomainMap.size() > 0){
+        if (null != this.childrenDomanName && childrenDomainMap.size() > 0) {
             SingleDomainQuery query = this.childrenDomainMap.get(this.childrenDomanName).singleDomainQuery;
-            if(null != query){
+            if (null != query) {
                 return query;
-            }else {
+            } else {
                 throw new RuntimeException("SingleDomainQuery is null");
             }
-        }else {
+        } else {
             throw new RuntimeException("childrenDomainMap is null");
 
         }
