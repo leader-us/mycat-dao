@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 public abstract class PagedQuery {
     protected static Logger log = LoggerFactory.getLogger(PagedQuery.class);
     protected String orderBy;
+    public String groupBy;
     protected Map<String, Object> queryParams = new HashMap<>();
     protected int pageIndex = -1;
     protected int pageSize = 20;
@@ -90,5 +91,6 @@ public abstract class PagedQuery {
     public Map<String, Object> getQueryParams() {
         return queryParams;
     }
+
 
 }
