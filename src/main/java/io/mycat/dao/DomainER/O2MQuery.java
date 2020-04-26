@@ -134,6 +134,7 @@ public class O2MQuery extends AbstractQuery {
         SingleDomainQuery query = new SingleDomainQuery().withSelectFields(domainCls, strings);
         String simpleName = domainCls.getSimpleName();
         this.childrenDomanName = simpleName;
+        //组装子查询对象的存储对象
         if (null != query) {
             ChildrenDomainQuery childrenDomainQuery = new ChildrenDomainQuery();
             childrenDomainQuery.singleDomainQuery = query;
@@ -170,6 +171,7 @@ public class O2MQuery extends AbstractQuery {
      */
     private SingleDomainQuery validateChildrenDomainMap() {
         if (null != this.childrenDomanName && childrenDomainMap.size() > 0) {
+            //验证子表对象是否存在
             SingleDomainQuery query = this.childrenDomainMap.get(this.childrenDomanName).singleDomainQuery;
             if (null != query) {
                 return query;
@@ -182,6 +184,11 @@ public class O2MQuery extends AbstractQuery {
         }
     }
 
+    /**
+     * 查找主键注解@ForeginKey
+     * @param childrenDomainCls
+     * @return
+     */
     private String findForeginKey(Class<?> childrenDomainCls) {
         Field[] fields = childrenDomainCls.getDeclaredFields();
         boolean flag = false;

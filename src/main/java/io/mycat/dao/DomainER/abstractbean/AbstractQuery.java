@@ -94,7 +94,11 @@ public abstract class AbstractQuery extends PagedQuery {
         return sb.toString();
     }
 
-
+    /**
+     * param 拆解,组装查询条件
+     *
+     * @return
+     */
     public Function<String, String> replaceQueryFieldByAlias() {
         return (t) -> {
             for (QueryField field : this.queryFields) {

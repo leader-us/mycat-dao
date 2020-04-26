@@ -103,7 +103,7 @@ public class LeaderDao {
 
     /**
      * 一对多sql查询
-     *
+     * 懒加载模式
      * @param query 查询地向
      * @return
      * @throws SQLException 构造sql异常
@@ -116,11 +116,12 @@ public class LeaderDao {
             log.debug("gernerted sql:{}", osql);
         }
         JsonArrayBuilder jsonArray = Json.createArrayBuilder();
-
+        //遍历主表所查询查来的数据
         while (rowSet.next()) {
             JsonObjectBuilder jsonObjectBuilder = JsonResultSet.toOJson(rowSet);
             int id = rowSet.getInt("id");
             Map<String, ChildrenDomainQuery> childrenDomainMap = o2MQuery.childrenDomainMap;
+            //取出子查询对象,每一个单独查询
             childrenDomainMap.forEach((k, v) -> {
                 SingleDomainQuery singleDomainQuery = v.singleDomainQuery;
                 String foreginKey = v.foreginKey;
