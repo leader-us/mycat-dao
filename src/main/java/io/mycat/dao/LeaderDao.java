@@ -4,6 +4,7 @@ import io.mycat.dao.DomainER.ChildrenDomainQuery;
 import io.mycat.dao.DomainER.O2MQuery;
 import io.mycat.dao.DomainER.SingleDomainQuery;
 import io.mycat.dao.query.PagedQuery;
+import io.mycat.dao.update.CatUpdate;
 import io.mycat.dao.util.JsonResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -18,6 +20,7 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +33,7 @@ import java.util.Map;
  * @author leader us
  */
 @Repository
+@Transactional(rollbackFor = Exception.class)
 public class LeaderDao {
     /**
      * The NamedParameterJdbcTemplate class adds support for programming JDBC
@@ -60,6 +64,9 @@ public class LeaderDao {
      */
     private NamedParameterJdbcTemplate jdbcTemplate;
     private static Logger log = LoggerFactory.getLogger(LeaderDao.class);
+
+    @Autowired
+    private CatUpdate catUpdate;
 
     @Autowired
     public void setDataSource(DataSource dataSource) {
@@ -103,6 +110,7 @@ public class LeaderDao {
 
     /**
      * 一对多sql查询
+     * 懒加载模式
      *
      * @param query 查询地向
      * @return
@@ -116,11 +124,12 @@ public class LeaderDao {
             log.debug("gernerted sql:{}", osql);
         }
         JsonArrayBuilder jsonArray = Json.createArrayBuilder();
-
+        //遍历主表所查询查来的数据
         while (rowSet.next()) {
             JsonObjectBuilder jsonObjectBuilder = JsonResultSet.toOJson(rowSet);
             int id = rowSet.getInt("id");
             Map<String, ChildrenDomainQuery> childrenDomainMap = o2MQuery.childrenDomainMap;
+            //取出子查询对象,每一个单独查询
             childrenDomainMap.forEach((k, v) -> {
                 SingleDomainQuery singleDomainQuery = v.singleDomainQuery;
                 String foreginKey = v.foreginKey;
@@ -145,6 +154,40 @@ public class LeaderDao {
             jsonArray.add(jsonObjectBuilder);
         }
 
+
         return jsonArray.build();
     }
+
+    /**
+     * 单个新增方法,
+     * 使用反射获取实例对象中的字段名和字段的值,
+     * 这个方法不会忽略空值
+     *
+     * @param o   实例对象
+     * @param cls 实例对象cls
+     * @return true成功 false失败
+     */
+    public boolean insert(Object o, Class<?> cls) {
+        String insertSql = catUpdate.createInsertSql(cls);
+        Map<String, Object> insertValueMap = catUpdate.createInsertValueMap(o, cls);
+        log.info("SQL ------" + insertSql);
+        log.info("VALUES ------" + insertValueMap);
+        return jdbcTemplate.update(insertSql, insertValueMap) > 0;
+    }
+
+    /**
+     * 批量新增方法,
+     * 生成新增sql语句,组合新增实例对象的 BeanPropertySqlParameterSource 数组
+     *
+     * @param entityList 对象集合
+     * @param cls        对象泛型cls
+     * @return true成功 false失败
+     */
+    public boolean batchUpdate(Collection entityList, Class<?> cls) {
+        String insertSql = catUpdate.createInsertSql(cls);
+        log.info("SQL ------" + insertSql);
+        jdbcTemplate.batchUpdate(insertSql, catUpdate.createBatchUpdateBP(entityList));
+        return true;
+    }
+
 }
